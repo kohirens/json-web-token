@@ -1,0 +1,14 @@
+{
+  "header": {
+    "kid": "1234",
+    "iss" :"4321",
+    "alg": "HS256"
+  },
+  "payload": {
+    "sub": "me@example.com",
+    "aud": "tableau",
+    "exp": "",
+    "jti":"uuid.random",
+    "scp": ["tableau:view:embed"]
+  }
+}
