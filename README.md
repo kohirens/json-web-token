@@ -8,8 +8,9 @@ update the library.
 
 ## Examples:
 
+### Build a JWT from Scratch
+
 ```go
-// Build a JWT for Tableau Cloud
 package main
 
 import (
@@ -39,6 +40,42 @@ func main() {
 	}
 
 	tableau.NewServer(&http.Client{}, token)
+}
+
+```
+
+### GitHub JWT:
+
+```go
+// Build a JWT for GitHub
+package main
+
+import (
+	"github.com/kohirens/json-web-token/jwt"
+	"github.com/kohirens/stdlib/logger"
+	"os"
+)
+
+var (
+	log = logger.Standard{}
+)
+
+func main() {
+	clientId := "aaaaaaaaa"
+	privatePemKey, e1 := os.ReadFile("rsa-priavate-pkcs1-key.pem")
+	if e1 != nil {
+		log.Errf(e1.Error())
+		os.Exit(1)
+    }
+
+	token, e1 := jwt.GitHub(clientId, privatePemKey)
+	if e1 != nil {
+		log.Errf(e1.Error())
+		os.Exit(1)
+	}
+	
+	// Do something with the token like pass it to a GitHub Client.
+	_ = token
 }
 
 ```
