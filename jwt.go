@@ -3,6 +3,7 @@ package jwt
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -27,7 +28,7 @@ func FormatTime(t time.Time) string {
 	return fmt.Sprintf("%v", t.UTC().Unix())
 }
 
-// Token Generate a JWT token from the Header, Payload, and secret as specified
+// Token Generate a JWT token from the header, payload, and secret as specified
 // by the JWT specification.
 func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
 	encHeader, e1 := Encode(header)
@@ -40,14 +41,28 @@ func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
 		return "", e2
 	}
 
-	// Now that we have the header and payload as base64 strings, we can encode
-	// them into a JWT token and return that.
-	sig, e3 := HS256(encHeader, encPayload, secret)
+	var encSig string
+	var e3 error
+
+	// Using the header and payload encoded as base64 strings, we can now build
+	// a signature encoded using the desired Algorithm.
+	alg, ok := header["alg"].(string)
+	if !ok {
+		return "", errors.New(stderr.AlgNotInHeader)
+	}
+	switch alg {
+	case "HS256":
+		encSig, e3 = HS256(encHeader, encPayload, secret)
+	case "RS256":
+		encSig, e3 = RS256(encHeader, encPayload, secret)
+	}
+
 	if e3 != nil {
 		return "", e3
 	}
 
-	return encHeader + "." + encPayload + "." + sig, nil
+	// Put it all base64 pieces together as a JWT token and return.
+	return encHeader + "." + encPayload + "." + encSig, nil
 }
 
 // Encode Will convert the JsonMap into a JSON string.
@@ -56,7 +71,7 @@ func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
 func Encode(content JsonMap) (string, error) {
 	data, e1 := json.Marshal(content)
 	if e1 != nil {
-		return "", fmt.Errorf(Stderr.CannotEncodeJSON, e1.Error())
+		return "", fmt.Errorf(stderr.CannotEncodeJSON, e1.Error())
 	}
 
 	return strings.TrimRight(base64.URLEncoding.EncodeToString(data), "="), nil
