@@ -15,7 +15,7 @@ func TestGitHub(t *testing.T) {
 		wantErr  bool
 	}{
 		{"invalid", "abcdefgahi", "private-key-pkcs8-pem.txt", "", true},
-		{"valid", "abcdefgahi", "private-key-pkcs1-pem.txt", "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxNz", false},
+		{"valid", "abcdefgahi", "private-key-pkcs1-pem.txt", "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQzNDY", false},
 	}
 
 	for _, c := range cases {
