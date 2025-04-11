@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  vr: kohirens/version-release@dev:47392fd6c953c179d49c85cc1fbc449e93f98322
+  vr: kohirens/version-release@5.0.1
 
 parameters:
   ctx_auto_release:
