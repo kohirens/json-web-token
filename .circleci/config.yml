@@ -8,10 +8,6 @@ parameters:
     default: kohirens-automation
     description: Secrets context
     type: string
-  ssh_finger:
-    description: SSH fingerprint.
-    type: string
-    default: "SHA256:TvHHGniDqNTc+a7nHmuYKa1SOt/ru9XE0yueq4MarbY"
   triggered_by_bot:
     default: false
     description: Trigger publishing a release tag workflow.
@@ -71,7 +67,6 @@ workflows:
     jobs:
       - vr/workflow-selector:
           context: << pipeline.parameters.ctx_auto_release >>
-          ssh_finger: << pipeline.parameters.ssh_finger >>
 
   publish-changelog:
     when:
@@ -80,7 +75,6 @@ workflows:
     jobs:
       - vr/publish-changelog:
           context: << pipeline.parameters.ctx_auto_release >>
-          ssh_finger: << pipeline.parameters.ssh_finger >>
 
   publish-release-tag:
     when:
