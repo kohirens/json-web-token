@@ -24,8 +24,8 @@ type Header JsonMap
 type Payload JsonMap
 
 // FormatTime Use to convert a time suitable for "exp", "iat", and "nbf" in the expected format. Will convert to UTC, then format.
-func FormatTime(t time.Time) string {
-	return fmt.Sprintf("%v", t.UTC().Unix())
+func FormatTime(t time.Time) int64 {
+	return t.UTC().Unix()
 }
 
 // Token Generate a JWT token from the header, payload, and secret as specified
