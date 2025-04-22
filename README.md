@@ -6,7 +6,7 @@ This library does not contain a lot of magic. Making it very clean and simple.
 Because of that, you can build almost any JWT without needing the author to
 update the library.
 
-For more info see  [resources] and [anatomy]
+For more info see  [resources] and [anatomy].
 
 ## Examples:
 
