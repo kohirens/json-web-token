@@ -6,6 +6,8 @@ This library does not contain a lot of magic. Making it very clean and simple.
 Because of that, you can build almost any JWT without needing the author to
 update the library.
 
+For more info see  [resources] and [anatomy]
+
 ## Examples:
 
 ### Build a JWT from Scratch
@@ -79,3 +81,8 @@ func main() {
 }
 
 ```
+
+---
+
+[anatomy]: /docs/anatomy.md
+[resources]: /docs/resources.md
