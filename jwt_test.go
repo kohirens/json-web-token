@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+const (
+	fixturesDir = "testdata"
+)
+
 type MockJWT struct {
 	Header  JsonMap `json:"header"`
 	Payload JsonMap `json:"payload"`

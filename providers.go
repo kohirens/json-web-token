@@ -10,7 +10,7 @@ func Tableau(userEmail, connectedAppClientId, connectedAppSecretId, connectedApp
 	header := JsonMap{
 		"kid": connectedAppSecretId,
 		"iss": connectedAppClientId,
-		"alg": "HS256",
+		cAlg:  algHS256,
 		"typ": "JWT",
 	}
 	payload := JsonMap{
@@ -34,7 +34,7 @@ func Tableau(userEmail, connectedAppClientId, connectedAppSecretId, connectedApp
 // https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
 func GitHub(clientId, privateKeyPem string) (string, error) {
 	header := JsonMap{
-		"alg": "RS256",
+		cAlg:  algRS256,
 		"typ": "JWT",
 	}
 	payload := JsonMap{
