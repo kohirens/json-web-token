@@ -56,8 +56,8 @@ func ValidateString(token, secret string, requiredPayloadClaims []string) (*Info
 	return info, nil
 }
 
-func decodeClaims(data string) (JsonMap, error) {
-	var ret JsonMap
+func decodeClaims(data string) (ClaimSet, error) {
+	var ret ClaimSet
 	h, e1 := base64.RawURLEncoding.DecodeString(data)
 
 	if e1 != nil {

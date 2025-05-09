@@ -6,10 +6,10 @@ import (
 )
 
 func ExampleToken() {
-	header := JsonMap{
+	header := ClaimSet{
 		"alg": "RS256",
 	}
-	payload := JsonMap{
+	payload := ClaimSet{
 		"admin": true,
 		"iat":   1516239022,
 		"name":  "John Doe",
@@ -20,10 +20,10 @@ func ExampleToken() {
 }
 
 func ExampleValidateRS256() {
-	header := JsonMap{
+	header := ClaimSet{
 		"alg": "RS256",
 	}
-	payload := JsonMap{
+	payload := ClaimSet{
 		"admin": true,
 		"iat":   1516239022,
 		"name":  "John Doe",

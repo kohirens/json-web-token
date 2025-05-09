@@ -7,13 +7,13 @@ import (
 
 // Tableau Build a JWT for Tableau Cloud.
 func Tableau(userEmail, connectedAppClientId, connectedAppSecretId, connectedAppSecretKey string) (string, error) {
-	header := JsonMap{
+	header := ClaimSet{
 		"kid": connectedAppSecretId,
 		"iss": connectedAppClientId,
 		cAlg:  algHS256,
 		"typ": "JWT",
 	}
-	payload := JsonMap{
+	payload := ClaimSet{
 		"aud": "tableau",
 		"exp": FormatTime(time.Now().Add(9 * time.Minute)),
 		"sub": userEmail,
@@ -33,11 +33,11 @@ func Tableau(userEmail, connectedAppClientId, connectedAppSecretId, connectedApp
 // For details see
 // https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
 func GitHub(clientId, privateKeyPem string) (string, error) {
-	header := JsonMap{
+	header := ClaimSet{
 		cAlg:  algRS256,
 		"typ": "JWT",
 	}
-	payload := JsonMap{
+	payload := ClaimSet{
 		"iat": FormatTime(time.Now().Add(-time.Duration(60) * time.Second)),
 		"exp": FormatTime(time.Now().Add(9 * time.Minute)),
 		"iss": clientId,

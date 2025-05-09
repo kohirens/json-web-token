@@ -12,16 +12,16 @@ func TestVerifyRS256(t *testing.T) {
 	}
 	cases := []struct {
 		name          string
-		header        JsonMap
-		payload       JsonMap
+		header        ClaimSet
+		payload       ClaimSet
 		privateKeyPem []byte
 		publicKeyPem  []byte
 		wantErr       bool
 	}{
 		{
 			"valid",
-			JsonMap{"alg": "RS256"},
-			JsonMap{"iss": "https://auth.example.com/"},
+			ClaimSet{"alg": "RS256"},
+			ClaimSet{"iss": "https://auth.example.com/"},
 			load("jwtRS256.key"),
 			load("jwtRS256.key.pub"),
 			false,

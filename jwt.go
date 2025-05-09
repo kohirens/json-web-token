@@ -14,15 +14,15 @@ type Info struct {
 	EncodedHeader    string
 	EncodedPayload   string
 	EncodedSignature string
-	Header           JsonMap
-	Payload          JsonMap
+	Header           ClaimSet
+	Payload          ClaimSet
 	Token            string
 	Type             string
 	Valid            bool
 }
 
-// JsonMap Represents an object that can be converted to the JSON that a JWT requires.
-type JsonMap map[string]interface{}
+// ClaimSet Represents an object that can be converted to the JSON that a JWT requires.
+type ClaimSet map[string]interface{}
 
 const (
 	jwsCompact = 2
@@ -44,10 +44,10 @@ func FormatTime(t time.Time) int64 {
 //	Note that ambiguities can arise due to differing platform representations
 //	of line breaks (CRLF versus LF), differing spacing at the beginning
 //	and ends of lines, whether the last line has a terminating line break
-//	or not, and other causes. However, with the JsonMap type
+//	or not, and other causes. However, with the ClaimSet type
 //	there are no line-breaks, space, nor tabs present in the JSON output
 //	before base64 encoding.
-func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
+func Token(header ClaimSet, payload ClaimSet, secret string) (string, error) {
 	encHeader, e1 := Encode(header)
 	if e1 != nil {
 		return "", e1
@@ -82,10 +82,10 @@ func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
 	return encHeader + sep + encPayload + sep + encSig, nil
 }
 
-// Encode Will convert the JsonMap into a JSON string.
+// Encode Will convert the ClaimSet into a JSON string.
 // Then encode the JSON string into a base64 string as JWT requires and return
 // that.
-func Encode(content JsonMap) (string, error) {
+func Encode(content ClaimSet) (string, error) {
 	data, e1 := json.Marshal(content)
 	if e1 != nil {
 		return "", fmt.Errorf(stderr.CannotEncodeJSON, e1.Error())
