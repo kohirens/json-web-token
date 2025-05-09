@@ -5,23 +5,33 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 )
+
+type Info struct {
+	Algorithm        string
+	Compact          bool
+	EncodedHeader    string
+	EncodedPayload   string
+	EncodedSignature string
+	Header           JsonMap
+	Payload          JsonMap
+	Token            string
+	Type             string
+	Valid            bool
+}
 
 // JsonMap Represents an object that can be converted to the JSON that a JWT requires.
 type JsonMap map[string]interface{}
 
-// Header Represents the claim fields to put into a JWT header.
-// The keys that are required here are up to the service provider. So be sure
-// to read their documentation for JWT requirements first.
-type Header JsonMap
-
-// Payload Represents the claim fields to put into a JWT payload.
-// The keys that are required here are up to the service provider, although
-// there are some that are standard. So be sure to read their documentation for
-// JWT requirements first.
-type Payload JsonMap
+const (
+	jwsCompact = 2
+	jweCompact = 4
+	cAlg       = "alg"
+	algHS256   = "HS256"
+	algRS256   = "RS256"
+	sep        = "."
+)
 
 // FormatTime Use to convert a time suitable for "exp", "iat", and "nbf" in the expected format. Will convert to UTC, then format.
 func FormatTime(t time.Time) int64 {
@@ -30,6 +40,13 @@ func FormatTime(t time.Time) int64 {
 
 // Token Generate a JWT token from the header, payload, and secret as specified
 // by the JWT specification.
+//
+//	Note that ambiguities can arise due to differing platform representations
+//	of line breaks (CRLF versus LF), differing spacing at the beginning
+//	and ends of lines, whether the last line has a terminating line break
+//	or not, and other causes. However, with the JsonMap type
+//	there are no line-breaks, space, nor tabs present in the JSON output
+//	before base64 encoding.
 func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
 	encHeader, e1 := Encode(header)
 	if e1 != nil {
@@ -46,14 +63,14 @@ func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
 
 	// Using the header and payload encoded as base64 strings, we can now build
 	// a signature encoded using the desired Algorithm.
-	alg, ok := header["alg"].(string)
+	alg, ok := header[cAlg].(string)
 	if !ok {
 		return "", errors.New(stderr.AlgNotInHeader)
 	}
 	switch alg {
-	case "HS256":
+	case algHS256:
 		encSig, e3 = HS256(encHeader, encPayload, secret)
-	case "RS256":
+	case algRS256:
 		encSig, e3 = RS256(encHeader, encPayload, secret)
 	}
 
@@ -62,7 +79,7 @@ func Token(header JsonMap, payload JsonMap, secret string) (string, error) {
 	}
 
 	// Put it all base64 pieces together as a JWT token and return.
-	return encHeader + "." + encPayload + "." + encSig, nil
+	return encHeader + sep + encPayload + sep + encSig, nil
 }
 
 // Encode Will convert the JsonMap into a JSON string.
@@ -74,5 +91,7 @@ func Encode(content JsonMap) (string, error) {
 		return "", fmt.Errorf(stderr.CannotEncodeJSON, e1.Error())
 	}
 
-	return strings.TrimRight(base64.URLEncoding.EncodeToString(data), "="), nil
+	// TODO: Verify the padding should be removed here.
+	//return strings.TrimRight(base64.RawURLEncoding.EncodeToString(data), "="), nil
+	return base64.RawURLEncoding.EncodeToString(data), nil
 }

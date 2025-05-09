@@ -9,7 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
+	"fmt"
 )
 
 // HS256 Algorithm to build a JWT.
@@ -54,4 +54,86 @@ func RS256(header, payload, privateKeyPem string) (string, error) {
 	encSignature := base64.RawURLEncoding.EncodeToString(signature)
 
 	return encSignature, nil
+}
+
+// ValidateRS256 validate the RSASSA-PKCS1-v1_5 SHA-256 digital signature
+// contained in the JWS Signature by using the public key to decrypt the
+// signature and verify that it matches the hash of the combined header and
+// payload.
+func ValidateRS256(publicKeyPem []byte, encSignature, encHeaderPlusPayload string) error {
+	signature, e1 := base64.RawURLEncoding.DecodeString(encSignature)
+	if e1 != nil {
+		return fmt.Errorf(stderr.Base64Decode, e1.Error())
+	}
+
+	// Hash the message using SHA256
+	hashed := sha256.Sum256([]byte(encHeaderPlusPayload))
+
+	publicKey, e2 := loadPublicKey(publicKeyPem)
+	if e2 != nil {
+		return e2
+	}
+
+	if e := rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hashed[:], signature); e != nil {
+		return fmt.Errorf(stderr.InvalidSignature, e.Error())
+	}
+
+	return nil
+}
+
+// This function is nearly identical to the loadPrivateKey function because Go
+// make it nearly impossible to return mores 1 type from a function. A drawback
+// of strongly typed languages is duplication.
+func loadPublicKey(publicKeyPem []byte) (*rsa.PublicKey, error) {
+	block, _ := pem.Decode(publicKeyPem)
+	if block == nil {
+		return nil, fmt.Errorf(stderr.DecodePublicKey)
+	}
+
+	var publicKey *rsa.PublicKey
+	var err error
+
+	switch block.Type {
+	case "RSA PUBLIC KEY": // PKCS#1
+		publicKey, err = x509.ParsePKCS1PublicKey(block.Bytes)
+	case "PUBLIC KEY": // PKCS#8
+		var pk interface{}
+		pk, err = x509.ParsePKIXPublicKey(block.Bytes)
+		publicKey = pk.(*rsa.PublicKey)
+	default:
+		return nil, fmt.Errorf(stderr.UnknownKeyFmt, block.Type)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf(stderr.PublicKey, err.Error())
+	}
+
+	return publicKey, nil
+}
+
+func loadPrivateKey(privateKeyPem []byte) (*rsa.PrivateKey, error) {
+	block, _ := pem.Decode(privateKeyPem)
+	if block == nil {
+		return nil, fmt.Errorf(stderr.DecodePublicKey)
+	}
+
+	var err error
+	var privateKey *rsa.PrivateKey
+
+	switch block.Type {
+	case "RSA PRIVATE KEY": // PKCS#1
+		privateKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+	case "PRIVATE KEY": // PKCS#8
+		var pk interface{}
+		pk, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+		privateKey = pk.(*rsa.PrivateKey)
+	default:
+		return nil, fmt.Errorf(stderr.UnknownKeyFmt, block.Type)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf(stderr.PrivateKey, err.Error())
+	}
+
+	return privateKey, nil
 }
