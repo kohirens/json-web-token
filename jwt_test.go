@@ -12,8 +12,8 @@ const (
 )
 
 type MockJWT struct {
-	Header  JsonMap `json:"header"`
-	Payload JsonMap `json:"payload"`
+	Header  ClaimSet `json:"header"`
+	Payload ClaimSet `json:"payload"`
 }
 
 func TestToken(runner *testing.T) {

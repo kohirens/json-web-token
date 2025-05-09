@@ -24,17 +24,17 @@ import (
 func TestValidate(t *testing.T) {
 	cases := []struct {
 		name     string
-		header   JsonMap
-		payload  JsonMap
+		header   ClaimSet
+		payload  ClaimSet
 		secret   string
 		required []string
-		want     JsonMap
+		want     ClaimSet
 		wantErr  bool
 	}{
 		{
 			"valid",
-			JsonMap{},
-			JsonMap{
+			ClaimSet{},
+			ClaimSet{
 				"iss":            "https://accounts.google.com",
 				"azp":            "1234987819200.apps.googleusercontent.com",
 				"aud":            "1234987819200.apps.googleusercontent.com",
@@ -49,7 +49,7 @@ func TestValidate(t *testing.T) {
 			},
 			"",
 			[]string{"aud", "exp", "iat", "iss", "sub"},
-			JsonMap{},
+			ClaimSet{},
 			true,
 		},
 	}
@@ -75,7 +75,7 @@ func TestValid(t *testing.T) {
 		token    []byte
 		secret   []byte
 		required []string
-		want     JsonMap
+		want     ClaimSet
 		wantErr  bool
 	}{
 		{
@@ -83,7 +83,7 @@ func TestValid(t *testing.T) {
 			load("rs256-valid-token.txt"),
 			load("jwtRS256.key.pub"),
 			[]string{"iat", "sub"},
-			JsonMap{
+			ClaimSet{
 				"sub":   "1234567890",
 				"name":  "John Doe",
 				"admin": true,
@@ -94,7 +94,7 @@ func TestValid(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			
+
 			_, err := Validate(c.token, c.secret, c.required)
 			if (err != nil) != c.wantErr {
 				t.Errorf("ValidateString() error = %v, wantErr %v", err, c.wantErr)
