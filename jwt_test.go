@@ -19,13 +19,13 @@ type MockJWT struct {
 func TestToken(runner *testing.T) {
 	cases := []struct {
 		name    string
-		secret  string
+		secret  []byte
 		want    string
 		wantErr bool
 	}{
 		{
 			"success",
-			"1234",
+			[]byte("1234"),
 			"eyJhbGciOiJIUzI1NiIsImlzcyI6IjQzMjEiLCJraWQiOiIxMjM0In0.eyJhdWQiOiJ0YWJsZWF1IiwiZXhwIjoiIiwianRpIjoidXVpZC5yYW5kb20iLCJzY3AiOlsidGFibGVhdTp2aWV3OmVtYmVkIl0sInN1YiI6Im1lQGV4YW1wbGUuY29tIn0",
 			false,
 		},

@@ -13,8 +13,8 @@ import (
 )
 
 // HS256 Algorithm to build a JWT.
-func HS256(header, payload, secret string) (string, error) {
-	h := hmac.New(sha256.New, []byte(secret))
+func HS256(header, payload string, secret []byte) (string, error) {
+	h := hmac.New(sha256.New, secret)
 
 	// Create a new HMAC-SHA256 hash
 	_, e1 := h.Write([]byte(header + "." + payload))
@@ -32,16 +32,12 @@ func HS256(header, payload, secret string) (string, error) {
 }
 
 // RS256 Algorithm PKCS1 to build a JWT.
-func RS256(header, payload, privateKeyPem string) (string, error) {
-	// Data to be signed
-	// Hash the message using SHA256
+func RS256(header, payload string, privateKeyPem []byte) (string, error) {
+	// Hash the data message to be signed using SHA256
 	hashed := sha256.Sum256([]byte(header + "." + payload))
-
-	// PKCS#1 RSAPrivateKey
-	block, _ := pem.Decode([]byte(privateKeyPem))
-	privateKey, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if privateKey == nil {
-		return "", errors.New("invalid private key")
+	privateKey, e1 := loadPrivateKey(privateKeyPem)
+	if e1 != nil {
+		return "", e1
 	}
 
 	// Sign the hashed message
@@ -60,14 +56,16 @@ func RS256(header, payload, privateKeyPem string) (string, error) {
 // contained in the JWS Signature by using the public key to decrypt the
 // signature and verify that it matches the hash of the combined header and
 // payload.
-func ValidateRS256(publicKeyPem []byte, encSignature, encHeaderPlusPayload string) error {
-	signature, e1 := base64.RawURLEncoding.DecodeString(encSignature)
+func ValidateRS256(publicKeyPem []byte, encSignature, encHeaderPlusPayload []byte) error {
+	signature := make([]byte, base64.RawURLEncoding.DecodedLen(len(encSignature)))
+
+	_, e1 := base64.RawURLEncoding.Decode(signature, encSignature)
 	if e1 != nil {
 		return fmt.Errorf(stderr.Base64Decode, e1.Error())
 	}
 
 	// Hash the message using SHA256
-	hashed := sha256.Sum256([]byte(encHeaderPlusPayload))
+	hashed := sha256.Sum256(encHeaderPlusPayload)
 
 	publicKey, e2 := loadPublicKey(publicKeyPem)
 	if e2 != nil {

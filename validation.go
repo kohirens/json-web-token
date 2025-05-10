@@ -48,7 +48,7 @@ func ValidateString(token, secret string, requiredPayloadClaims []string) (*Info
 
 	switch info.Algorithm {
 	case algRS256:
-		if e := ValidateRS256([]byte(secret), info.EncodedSignature, info.EncodedHeader+"."+info.EncodedPayload); e != nil {
+		if e := ValidateRS256([]byte(secret), []byte(info.EncodedSignature), []byte(info.EncodedHeader+"."+info.EncodedPayload)); e != nil {
 			return nil, e
 		}
 	}
