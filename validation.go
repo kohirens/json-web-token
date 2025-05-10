@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"strings"
 )
 
 var whitespaceReg = regexp.MustCompile("([\n\r\t ]+)")
@@ -32,7 +31,7 @@ func ValidateString(token, secret string, requiredPayloadClaims []string) (*Info
 		return nil, &ErrInvalidFmt{"whitespace characters detected in the token"}
 	}
 
-	info, e1 := parse(token)
+	info, e1 := Parse(token)
 	if e1 != nil {
 		return nil, e1
 	}
@@ -70,66 +69,4 @@ func decodeClaims(data string) (ClaimSet, error) {
 	}
 
 	return ret, nil
-}
-
-// parse Determines the type of JWT to understand how best to validate it
-// according to
-// [RFC7516 Section 9](https://www.rfc-editor.org/rfc/rfc7516.html#section-9).
-func parse(token string) (*Info, error) {
-	numSeparators := strings.Count(token, ".")
-	if numSeparators < 1 {
-		return nil, &ErrInvalidFmt{}
-	}
-
-	parts := strings.Split(token, ".")
-
-	header, e1 := decodeClaims(parts[0])
-	if e1 != nil {
-		return nil, &ErrInvalidFmt{"header " + e1.Error()}
-	}
-
-	alg, ok := lookUp(header, "alg") // do a case-insensitive lookup here.
-	if !ok {
-		return nil, fmt.Errorf(stderr.AlgNotInHeader)
-	}
-
-	payload, e2 := decodeClaims(parts[1])
-	if e2 != nil {
-		return nil, &ErrInvalidFmt{"payload " + e2.Error()}
-	}
-
-	//	If the object is using the JWS Compact Serialization or the JWE
-	//	Compact Serialization, the number of base64url-encoded segments
-	//	separated by period ('.') characters differs for JWSs and JWEs.
-	//	JWSs have three segments separated by two period ('.') characters.
-	//	JWEs have five segments separated by four period ('.') characters.
-	if numSeparators == jwsCompact { // assume JWS compact serialization
-		return &Info{
-			Algorithm:        alg,
-			EncodedHeader:    parts[0],
-			EncodedPayload:   parts[1],
-			EncodedSignature: parts[2],
-			Compact:          true,
-			Type:             "JWS",
-			Header:           header,
-			Payload:          payload,
-		}, nil
-	}
-
-	// If the object is using the JWS JSON Serialization or the JWE JSON
-	// Serialization, the members used will be different. JWSs have a
-	// "payload" member and JWEs do not. JWEs have a "ciphertext" member
-	// and JWSs do not. However, there is no way to determine if these are
-	// present without decoding the whole thing, thus the only reliable way is
-	// to count the number of separators, and assume the type.
-	// See more JWS examples in [Appendix A. JWS Examples](https://www.rfc-editor.org/rfc/rfc7515.html#appendix-A)
-	if numSeparators == jweCompact { // assume JWS compact serialization
-		return &Info{
-			Algorithm: alg,
-			Compact:   true,
-			Type:      "JWE",
-		}, nil
-	}
-
-	return nil, fmt.Errorf(stderr.ParseToken)
 }

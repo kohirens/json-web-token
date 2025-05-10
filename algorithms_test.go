@@ -35,7 +35,7 @@ func TestVerifyRS256(t *testing.T) {
 				return
 			}
 
-			token, e2 := parse(tkn)
+			token, e2 := Parse(tkn)
 			if (e2 != nil) != c.wantErr {
 				t.Errorf("TestVerifyRS256() error = %v, wantErr %v", e2, c.wantErr)
 				return
