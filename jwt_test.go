@@ -16,6 +16,14 @@ type MockJWT struct {
 	Payload ClaimSet `json:"payload"`
 }
 
+func load(filename string) []byte {
+	data, e1 := os.ReadFile(fixturesDir + "/" + filename)
+	if e1 != nil {
+		panic(e1)
+	}
+	return data
+}
+
 func TestToken(runner *testing.T) {
 	cases := []struct {
 		name    string

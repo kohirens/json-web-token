@@ -82,6 +82,50 @@ func Token(header ClaimSet, payload ClaimSet, secret []byte) (string, error) {
 	return encHeader + sep + encPayload + sep + encSig, nil
 }
 
+// BuildJWS Generate a JWT token from the header, payload, and secret as specified
+// by the JWT specification.
+//
+//	Note that ambiguities can arise due to differing platform representations
+//	of line breaks (CRLF versus LF), differing spacing at the beginning
+//	and ends of lines, whether the last line has a terminating line break
+//	or not, and other causes. However, with the ClaimSet type
+//	there are no line-breaks, space, nor tabs present in the JSON output
+//	before base64 encoding.
+func BuildJWS(header ClaimSet, payload ClaimSet, secretKey []byte) ([]byte, error) {
+	encHeader, e1 := Encode(header)
+	if e1 != nil {
+		return nil, e1
+	}
+
+	encPayload, e2 := Encode(payload)
+	if e2 != nil {
+		return nil, e2
+	}
+
+	var encSig string
+	var e3 error
+
+	// Using the header and payload encoded as base64 strings, we can now build
+	// a signature encoded using the desired Algorithm.
+	alg, ok := header[cAlg].(string)
+	if !ok {
+		return nil, errors.New(stderr.AlgNotInHeader)
+	}
+	switch alg {
+	case algHS256:
+		encSig, e3 = HS256(encHeader, encPayload, secretKey)
+	case algRS256:
+		encSig, e3 = RS256(encHeader, encPayload, secretKey)
+	}
+
+	if e3 != nil {
+		return nil, e3
+	}
+
+	// Put it all base64 pieces together as a JWT token and return.
+	return []byte(encHeader + sep + encPayload + sep + encSig), nil
+}
+
 // Encode Will convert the ClaimSet into a JSON string.
 // Then encode the JSON string into a base64 string as JWT requires and return
 // that.

@@ -53,6 +53,7 @@ func ValidateString(token, secret string, requiredPayloadClaims []string) (*Info
 		}
 	}
 
+	info.Valid = true
 	return info, nil
 }
 
@@ -69,31 +70,6 @@ func decodeClaims(data string) (ClaimSet, error) {
 	}
 
 	return ret, nil
-}
-
-// Validate Run checks on the JOSE header according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-7.2)
-func validHeader(encodedHeader string) error {
-	// 3. Base64url decode the Encoded JOSE Header following the restriction
-	// that no line breaks, whitespace, or other additional characters have
-	// been used.
-
-	h, e1 := decodeClaims(encodedHeader)
-	if e1 != nil {
-		return &ErrInvalidFmt{"header " + e1.Error()}
-	}
-	algFound := false
-	// contains the `alg` claim
-	for claim, _ := range h {
-		if strings.ToLower(claim) == "alg" {
-			algFound = true
-			break
-		}
-	}
-	if !algFound {
-		return fmt.Errorf(stderr.AlgNotInHeader)
-	}
-
-	return nil
 }
 
 // parse Determines the type of JWT to understand how best to validate it
@@ -115,10 +91,6 @@ func parse(token string) (*Info, error) {
 	alg, ok := lookUp(header, "alg") // do a case-insensitive lookup here.
 	if !ok {
 		return nil, fmt.Errorf(stderr.AlgNotInHeader)
-	}
-
-	if e := validHeader(parts[0]); e != nil {
-		return nil, &ErrInvalidFmt{"invalid header " + e.Error()}
 	}
 
 	payload, e2 := decodeClaims(parts[1])
