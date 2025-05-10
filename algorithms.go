@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"bytes"
 	"crypto"
 	"crypto/hmac"
 	"crypto/rand"
@@ -73,6 +74,27 @@ func ValidateRS256(publicKeyPem []byte, encSignature, encHeaderPlusPayload []byt
 	}
 
 	if e := rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hashed[:], signature); e != nil {
+		return fmt.Errorf(stderr.InvalidSignature, e.Error())
+	}
+
+	return nil
+}
+
+func ValidateSignatureRS256Pub(token []byte, key *rsa.PublicKey) error {
+	parts := bytes.Split(token, []byte("."))
+	encSignature := parts[2]
+	encHeaderPlusPayload := bytes.Join([][]byte{parts[0], parts[1]}, []byte("."))
+
+	signature := make([]byte, base64.RawURLEncoding.DecodedLen(len(encSignature)))
+	_, e1 := base64.RawURLEncoding.Decode(signature, encSignature)
+	if e1 != nil {
+		return fmt.Errorf(stderr.Base64Decode, e1.Error())
+	}
+
+	// Hash the message using SHA256
+	hashed := sha256.Sum256(encHeaderPlusPayload)
+
+	if e := rsa.VerifyPKCS1v15(key, crypto.SHA256, hashed[:], signature); e != nil {
 		return fmt.Errorf(stderr.InvalidSignature, e.Error())
 	}
 
