@@ -47,7 +47,7 @@ func FormatTime(t time.Time) int64 {
 //	or not, and other causes. However, with the ClaimSet type
 //	there are no line-breaks, space, nor tabs present in the JSON output
 //	before base64 encoding.
-func Token(header ClaimSet, payload ClaimSet, secret string) (string, error) {
+func Token(header ClaimSet, payload ClaimSet, secret []byte) (string, error) {
 	encHeader, e1 := Encode(header)
 	if e1 != nil {
 		return "", e1

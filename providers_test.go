@@ -21,7 +21,7 @@ func TestGitHub(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			key, _ := os.ReadFile("testdata/" + c.pemFile)
-			got, err := GitHub(c.clientId, string(key))
+			got, err := GitHub(c.clientId, key)
 
 			if (err != nil) != c.wantErr {
 				t.Errorf("GitHub() error = %v, wantErr %v", err, c.wantErr)

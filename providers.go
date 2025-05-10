@@ -21,7 +21,7 @@ func Tableau(userEmail, connectedAppClientId, connectedAppSecretId, connectedApp
 		"scp": []string{"tableau:views:embed", "tableau:metrics:embed"},
 	}
 
-	ss, e1 := Token(header, payload, connectedAppSecretKey)
+	ss, e1 := Token(header, payload, []byte(connectedAppSecretKey))
 	if e1 != nil {
 		return "", e1
 	}
@@ -32,7 +32,7 @@ func Tableau(userEmail, connectedAppClientId, connectedAppSecretId, connectedApp
 // GitHub Build a JWT for an Application.
 // For details see
 // https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
-func GitHub(clientId, privateKeyPem string) (string, error) {
+func GitHub(clientId string, privateKeyPem []byte) (string, error) {
 	header := ClaimSet{
 		cAlg:  algRS256,
 		"typ": "JWT",

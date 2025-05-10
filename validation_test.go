@@ -26,7 +26,7 @@ func TestValidate(t *testing.T) {
 		name     string
 		header   ClaimSet
 		payload  ClaimSet
-		secret   string
+		secret   []byte
 		required []string
 		want     ClaimSet
 		wantErr  bool
@@ -47,7 +47,7 @@ func TestValidate(t *testing.T) {
 				"exp":            1353604926,
 				"nonce":          "0394852-3190485-2490358",
 			},
-			"",
+			load("jwtRS256.key.pub"),
 			[]string{"aud", "exp", "iat", "iss", "sub"},
 			ClaimSet{},
 			true,
@@ -57,7 +57,7 @@ func TestValidate(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			token, _ := Token(c.header, c.payload, c.secret)
 
-			got, err := ValidateString(token, c.secret, c.required)
+			got, err := Validate(token, c.secret, c.required)
 			if (err != nil) != c.wantErr {
 				t.Errorf("ValidateString() error = %v, wantErr %v", err, c.wantErr)
 				return

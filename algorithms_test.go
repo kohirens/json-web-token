@@ -29,7 +29,7 @@ func TestVerifyRS256(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			tkn, e1 := Token(c.header, c.payload, string(c.privateKeyPem))
+			tkn, e1 := Token(c.header, c.payload, c.privateKeyPem)
 			if (e1 != nil) != c.wantErr {
 				t.Errorf("TestVerifyRS256() error = %v, wantErr %v", e1, c.wantErr)
 				return
@@ -40,7 +40,7 @@ func TestVerifyRS256(t *testing.T) {
 				t.Errorf("TestVerifyRS256() error = %v, wantErr %v", e2, c.wantErr)
 				return
 			}
-			if err := ValidateRS256(c.publicKeyPem, token.EncodedSignature, token.EncodedHeader+"."+token.EncodedPayload); (err != nil) != c.wantErr {
+			if err := ValidateRS256(c.publicKeyPem, []byte(token.EncodedSignature), []byte(token.EncodedHeader+"."+token.EncodedPayload)); (err != nil) != c.wantErr {
 				t.Errorf("VerifyRS256() error = %v, wantErr %v", err, c.wantErr)
 				return
 			}
