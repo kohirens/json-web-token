@@ -22,13 +22,13 @@ import (
 )
 
 func main() {
-	header := jwt.JsonMap{
+	header := jwt.ClaimSet{
 		"kid": "connectedAppSecretId",
 		"iss": "connectedAppClientId",
 		"alg": "HS256",
 		"typ": "JWT",
 	}
-	payload := jwt.JsonMap{
+	payload := jwt.ClaimSet{
 		"aud": "tableau",
 		"exp": jwt.FormatTime(time.Now().Add(9 * time.Minute).UTC()),
 		"sub": "user@example.com",
@@ -36,7 +36,7 @@ func main() {
 		"scp": []string{"tableau:views:embed", "tableau:metrics:embed"},
 	}
 
-	token, e1 := jwt.Token(header, payload, "connectedAppSecretKey")
+	token, e1 := jwt.BuildJWS(header, payload, "appSecretOrKey")
 	if e1 != nil {
 		panic(e1.Error())
 	}

@@ -79,7 +79,10 @@ func ValidateRS256(publicKeyPem []byte, encSignature, encHeaderPlusPayload []byt
 	return nil
 }
 
-// This function is nearly identical to the loadPrivateKey function because Go
+// loadPublicKey Load a PKCS#1 or PKCS#8 public key in PEM format. No other
+// format has been tested.
+// Go isn't designed so that you can pass different types from a function without
+// the using magic. However, the drawback is that  usfunction is nearly identical to the loadPrivateKey function because Go
 // make it nearly impossible to return mores 1 type from a function. A drawback
 // of strongly typed languages is duplication.
 func loadPublicKey(publicKeyPem []byte) (*rsa.PublicKey, error) {
@@ -109,6 +112,8 @@ func loadPublicKey(publicKeyPem []byte) (*rsa.PublicKey, error) {
 	return publicKey, nil
 }
 
+// loadPrivateKey Load a PKCS#1 or PKCS#8 private key in PEM format. No other
+// format has been tested.
 func loadPrivateKey(privateKeyPem []byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(privateKeyPem)
 	if block == nil {
